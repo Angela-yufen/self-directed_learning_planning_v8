@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>費曼學習法 × 自主學習週循環操作單</title>
+  <!-- 載入 html2pdf.js 套件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #3b82f6;
+      --primary-hover: #1d4ed8;
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-color: #1f2937;
+      --border-color: #e5e7eb;
+      --accent-color: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      padding: 20px 10px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      padding: 30px;
+      position: relative;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 15px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      color: #1e3a8a;
+    }
+
+    header p {
+      color: #6b7280;
+      font-size: 0.95rem;
+      margin-top: 5px;
+    }
+
+    .header-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 15px;
+    }
+
+    .quote-box {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--primary-color);
+      padding: 10px 15px;
+      font-style: italic;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #1e40af;
+      text-align: left;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      margin-bottom: 25px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background-color: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: var(--primary-color);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .step-indicators {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    /* Steps Content */
+    .step-content {
+      display: none;
+    }
+
+    .step-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-title {
+      font-size: 1.25rem;
+      margin-bottom: 15px;
+      color: #1e3a8a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .step-hint {
+      background-color: #fffbeb;
+      border: 1px solid #fef3c7;
+      color: #92400e;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .checkbox-group, .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .checkbox-item, .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .checkbox-item-custom {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .checkbox-item-custom input[type="text"] {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 0.95rem;
+    }
+
+    /* Timer Widget */
+    .timer-box {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px dashed #cbd5e1;
+      margin-bottom: 15px;
+    }
+
+    .timer-display {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #0f172a;
+      font-family: monospace;
+    }
+
+    /* Buttons Group */
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-color);
+      position: relative;
+      z-index: 10;
+    }
+
+    button {
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-prev {
+      background-color: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-prev:hover {
+      background-color: #d1d5db;
+    }
+
+    .btn-next, .btn-submit {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-next:hover, .btn-submit:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: #10b981;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #059669;
+    }
+
+    .btn-danger {
+      background-color: #f3f4f6;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+    }
+
+    .btn-danger:hover {
+      background-color: #fee2e2;
+    }
+
+    /* PDF 排版專用卡片 */
+    .preview-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 25px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .preview-item {
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      word-break: break-word;
+      line-height: 1.6;
+    }
+
+    .preview-item strong {
+      color: #1e3a8a;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 1rem;
+    }
+
+    /* 頁尾 Style */
+    footer {
+      text-align: center;
+      margin-top: 25px;
+      padding-top: 15px;
+      font-size: 0.85rem;
+      color: #6b7280;
+      border-top: 1px dashed #cbd5e1;
+      pointer-events: none;
+    }
+
+    /* Print Style Optimization */
+    @media print {
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; max-width: 100%; width: 100%; padding: 0; }
+      .progress-container, .button-group, .timer-box, .step-hint, .header-actions, footer { display: none !important; }
+      .step-content { display: block !important; page-break-inside: avoid; }
+      .preview-card { border: none; padding: 0; }
+      header h1 { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header-actions">
+    <button type="button" class="btn-danger" onclick="resetFormForNewWeek()">🧹 開啟新一週（清空舊內容）</button>
+  </div>
+
+  <header>
+    <h1>費曼學習法 × 自主學習週循環操作單</h1>
+    <p>用「教得會」來檢驗「學得懂」</p>
+    <div class="quote-box">
+      「如果你沒辦法用簡單的話把一件事講清楚，代表你其實還沒真正懂它。」—— 理查·費曼 (Richard Feynman)
+    </div>
+  </header>
+
+  <!-- 進度條 -->
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="step-indicators">
+      <span>基本資料</span>
+      <span>1.選定</span>
+      <span>2.試教</span>
+      <span>3.抓漏</span>
+      <span>4.簡化</span>
+      <span>5.檢核</span>
+      <span>6.反思</span>
+      <span>完成</span>
+    </div>
+  </div>
+
+  <form id="feynmanForm">
+    <!-- 步驟 0：基本資料 -->
+    <div class="step-content active" data-step="0">
+      <div class="step-title">📋 基本資訊</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="studentName">姓名</label>
+          <input type="text" id="studentName" name="studentName" placeholder="請輸入姓名">
+        </div>
+        <div class="form-group">
+          <label for="studentClass">班級 / 座號</label>
+          <input type="text" id="studentClass" name="studentClass" placeholder="例如：高一1班 05號">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="topic">自主學習主題</label>
+          <input type="text" id="topic" name="topic" placeholder="例如：高中物理自由落體研究">
+        </div>
+        <div class="form-group">
+          <label for="weekNum">第幾週 (1~10週)</label>
+          <input type="number" id="weekNum" name="weekNum" min="1" max="10" placeholder="1">
+        </div>
+        <div class="form-group">
+          <label for="learnDate">日期</label>
+          <input type="date" id="learnDate" name="learnDate">
+        </div>
+      </div>
+    </div>
+
+    <!-- 步驟 1：選定概念 -->
+    <div class="step-content" data-step="1">
+      <div class="step-title">1. 選定一個概念</div>
+      <div class="step-hint">
+        💡 <strong>小撇步：</strong>把你這週最想弄懂的「一個」概念寫下來。範圍越小越好，例如「碳循環」、「等加速度運動」、「供需法則」，而不是整個大單元。
+      </div>
+      <div class="form-group">
+        <label for="concept">本週精選概念：</label>
+        <input type="text" id="concept" name="concept" placeholder="請填寫具體的小概念名稱">
+      </div>
+    </div>
+
+    <!-- 步驟 2：假裝你在教一個完全不懂的人 -->
+    <div class="step-content" data-step="2">
+      <div class="step-title">2. 假裝你在教一個完全不懂的人</div>
+      <div class="step-hint">
+        💡 想像對象是國中學弟妹或小學生。用最白話的方式把概念講出來或寫下來。不准用艱深術語逃避，遇到非用不可的詞，也要順手解釋它是什麼。
+      </div>
+
+      <div class="timer-box">
+        <span>⏱️ 講解練習計時器：</span>
+        <div class="timer-display" id="timerDisplay">03:00</div>
+        <button type="button" class="btn-secondary" onclick="toggleTimer()">開始 / 暫停</button>
+        <button type="button" class="btn-prev" onclick="resetTimer()">重設</button>
+      </div>
+
+      <div class="form-group">
+        <label for="explanation">我的白話講解內容：</label>
+        <textarea id="explanation" name="explanation" rows="6" placeholder="試著用最簡單白話的話說說看..."></textarea>
+      </div>
+    </div>
+
+    <!-- 步驟 3：找出你卡住的破洞 -->
+    <div class="step-content" data-step="3">
+      <div class="step-title">3. 找出你卡住的破洞</div>
+      <div class="step-hint">
+        🔍 回頭看剛才的解釋：哪裡講不下去？哪裡含糊帶過？哪裡要偷翻課本才講得出來？那些地方就是你還沒真懂的破洞。
+      </div>
+      <div class="form-group">
+        <label for="stuckPoint">我卡住或含糊的地方是：</label>
+        <textarea id="stuckPoint" name="stuckPoint" rows="3" placeholder="例如：不確定公式裡的符號代表什麼意思..."></textarea>
+      </div>
+      <div class="form-group">
+        <label for="needToLearn">我需要回去重新弄懂的是：</label>
+        <textarea id="needToLearn" name="needToLearn" rows="3" placeholder="例如：重新看課本第35頁的圖表說明..."></textarea>
+      </div>
+    </div>
+
+    <!-- 步驟 4：簡化，並加上你自己的比喻 -->
+    <div class="step-content" data-step="4">
+      <div class="step-title">4. 簡化，並加上你自己的比喻</div>
+      <div class="step-hint">
+        ✨ 補完破洞後，把解釋再講一次，這次更短更順。最後替它配上一個你自己想到的比喻或例子，能比喻得貼切，才是真的內化了。
+      </div>
+      <div class="form-group">
+        <label for="analogy">我的比喻 / 生活例子：</label>
+        <textarea id="analogy" name="analogy" rows="3" placeholder="例如：這就像是在搭公車時..."></textarea>
+      </div>
+      <div class="form-group">
+        <label for="summarySentence">一句話總結這個概念：</label>
+        <input type="text" id="summarySentence" name="summarySentence" placeholder="用一簡短有力的一句話總結">
+      </div>
+    </div>
+
+    <!-- 步驟 5：自我檢核與完成輸出 -->
+    <div class="step-content" data-step="5">
+      <div class="step-title">5. 自我檢核：別只是「換句話說」</div>
+      <div class="step-hint">
+        ❓ 能換句話說不代表懂。試著回答下面兩個問題，如果答得吞吞吐吐，就回到步驟 3 補洞。
+      </div>
+      
+      <div class="form-group">
+        <label for="checkQ1">① 為什麼會這樣？（說出原因或運作機制）</label>
+        <textarea id="checkQ1" name="checkQ1" rows="3" placeholder="請說明原因或運作機制..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="checkQ2">② 如果條件改變，結果會怎樣？</label>
+        <textarea id="checkQ2" name="checkQ2" rows="3" placeholder="請說明條件改變後的可能結果..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>我的檢核狀態：</label>
+        <div class="radio-group">
+          <label class="radio-item">
+            <input type="radio" name="checkStatus" value="兩題都答得很順"> 兩題都答得很順
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="checkStatus" value="有點卡（回到步驟 3 補洞）"> 有點卡（回到步驟 3 補洞）
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>完成一種「輸出」（選一項打勾）：</label>
+        <div class="checkbox-group">
+          <label class="checkbox-item"><input type="checkbox" name="outputType" value="錄一段 3 分鐘的講解影片"> 錄一段 3 分鐘的講解影片</label>
+          <label class="checkbox-item"><input type="checkbox" name="outputType" value="寫一篇給同學看的科普短文"> 寫一篇給同學看的科普短文</label>
+          <label class="checkbox-item"><input type="checkbox" name="outputType" value="畫一張一頁式的概念圖/心智圖"> 畫一張一頁式的概念圖/心智圖</label>
+          <label class="checkbox-item"><input type="checkbox" name="outputType" value="口頭講給同學聽，並請他提出一個問題"> 口頭講給同學聽，並請他提出一個問題</label>
+          
+          <!-- 新增「其他」由學生自行填寫欄位 -->
+          <div class="checkbox-item-custom">
+            <label class="checkbox-item" style="white-space: nowrap;">
+              <input type="checkbox" name="outputType" value="其他" id="outputTypeOtherCB"> 其他：
+            </label>
+            <input type="text" id="outputTypeOtherText" name="outputTypeOtherText" placeholder="請自訂輸出形式..." oninput="autoCheckOther()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步驟 6：反思與下週目標 -->
+    <div class="step-content" data-step="6">
+      <div class="step-title">6. 下週目標與本週反思</div>
+      <div class="step-hint">
+        🌱 被同學問倒的問題或今天的破洞，往往是最好的下週目標！
+      </div>
+      <div class="form-group">
+        <label for="nextGoal">下週學習目標（從今天的破洞長出來）：</label>
+        <textarea id="nextGoal" name="nextGoal" rows="3" placeholder="根據今天卡住的地方，我下週要弄懂的是..."></textarea>
+      </div>
+      <div class="form-group">
+        <label for="reflection">本週反思：</label>
+        <textarea id="reflection" name="reflection" rows="3" placeholder="這週我從「以為懂」到「真的懂」，最大的差別在哪裡？"></textarea>
+      </div>
+    </div>
+
+    <!-- 步驟 7：總覽預覽頁（PDF 只輸出這個卡片） -->
+    <div class="step-content" data-step="7">
+      <div class="step-title">🎉 完成！您的自主學習週循環單</div>
+      <div id="previewCardTarget" class="preview-card">
+        <div id="previewContainer"></div>
+      </div>
+    </div>
+
+    <!-- 導覽按鈕組合 -->
+    <div class="button-group">
+      <button type="button" id="prevBtn" class="btn-prev" onclick="changeStep(-1)">上一步</button>
+      <button type="button" id="nextBtn" class="btn-next" onclick="changeStep(1)">下一步</button>
+      <button type="button" id="printBtn" class="btn-secondary" style="display: none;" onclick="generatePDF()">📄 產生 / 匯出 PDF 檔</button>
+    </div>
+  </form>
+
+  <!-- 頁尾版權宣告 -->
+  <footer>
+    <p>💡 本自主學習週循環單由 <strong>劉郁芬老師</strong> 與 <strong>Gemini AI</strong> 共同設計開發</p>
+    <p style="font-size: 0.75rem; margin-top: 3px; color: #9ca3af;">© 2026 版權所有，歡迎教學使用</p>
+  </footer>
+</div>
+
+<script>
+  let currentStep = 0;
+  const totalSteps = 7;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    loadFormData();
+    updateStepView();
+    document.getElementById('feynmanForm').addEventListener('input', saveFormData);
+  });
+
+  // 輸入「其他」文字時自動幫學生勾選「其他」核取方塊
+  function autoCheckOther() {
+    const txt = document.getElementById('outputTypeOtherText').value.trim();
+    const cb = document.getElementById('outputTypeOtherCB');
+    if (txt.length > 0) {
+      cb.checked = true;
+    }
+  }
+
+  function updateStepView() {
+    document.querySelectorAll('.step-content').forEach((step, idx) => {
+      step.classList.toggle('active', idx === currentStep);
+    });
+
+    const progressPercent = (currentStep / totalSteps) * 100;
+    document.getElementById('progressFill').style.width = `${progressPercent}%`;
+
+    document.getElementById('prevBtn').style.display = currentStep === 0 ? 'none' : 'inline-block';
+    
+    if (currentStep === totalSteps) {
+      document.getElementById('nextBtn').style.display = 'none';
+      document.getElementById('printBtn').style.display = 'inline-block';
+      generatePreview();
+    } else {
+      document.getElementById('nextBtn').style.display = 'inline-block';
+      document.getElementById('nextBtn').innerText = currentStep === totalSteps - 1 ? '完成並預覽' : '下一步';
+      document.getElementById('printBtn').style.display = 'none';
+    }
+  }
+
+  function changeStep(delta) {
+    currentStep += delta;
+    if (currentStep < 0) currentStep = 0;
+    if (currentStep > totalSteps) currentStep = totalSteps;
+    updateStepView();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function saveFormData() {
+    const formData = new FormData(document.getElementById('feynmanForm'));
+    const data = {};
+    for (let [key, value] of formData.entries()) {
+      if (data[key]) {
+        if (!Array.isArray(data[key])) data[key] = [data[key]];
+        data[key].push(value);
+      } else {
+        data[key] = value;
+      }
+    }
+    localStorage.setItem('feynman_form_data', JSON.stringify(data));
+  }
+
+  function loadFormData() {
+    const saved = localStorage.getItem('feynman_form_data');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    
+    for (let key in data) {
+      const fields = document.querySelectorAll(`[name="${key}"]`);
+      if (!fields.length) continue;
+
+      fields.forEach(field => {
+        if (field.type === 'checkbox' || field.type === 'radio') {
+          const values = Array.isArray(data[key]) ? data[key] : [data[key]];
+          if (values.includes(field.value)) field.checked = true;
+        } else {
+          field.value = data[key];
+        }
+      });
+    }
+  }
+
+  function resetFormForNewWeek() {
+    const confirmReset = confirm("確定要開始新的一週嗎？\n\n系統將會【清空】本週填寫的內容，並保留您的姓名、班級與主題。\n（請確認本週的 PDF 是否已經匯出下載！）");
+    if (confirmReset) {
+      const name = document.getElementById('studentName').value;
+      const sClass = document.getElementById('studentClass').value;
+      const topic = document.getElementById('topic').value;
+      const currentWeek = parseInt(document.getElementById('weekNum').value || 1);
+
+      document.getElementById('feynmanForm').reset();
+      localStorage.removeItem('feynman_form_data');
+
+      document.getElementById('studentName').value = name;
+      document.getElementById('studentClass').value = sClass;
+      document.getElementById('topic').value = topic;
+      document.getElementById('weekNum').value = currentWeek < 10 ? currentWeek + 1 : 10;
+      document.getElementById('learnDate').valueAsDate = new Date();
+
+      saveFormData();
+      currentStep = 0;
+      updateStepView();
+      alert("已成功清空！已自動為您將週別調整為第 " + document.getElementById('weekNum').value + " 週，請開始填寫新的學習單！");
+    }
+  }
+
+  function generatePreview() {
+    const getValue = id => document.getElementById(id)?.value || '（未填寫）';
+    const checkStatus = document.querySelector('input[name="checkStatus"]:checked')?.value || '未選擇';
+    
+    // 彙整輸出形式（處理「其他」選項）
+    const selectedOutputs = Array.from(document.querySelectorAll('input[name="outputType"]:checked')).map(cb => {
+      if (cb.value === '其他') {
+        const otherTxt = getValue('outputTypeOtherText');
+        return `其他（${otherTxt}）`;
+      }
+      return cb.value;
+    });
+    const outputs = selectedOutputs.join('、') || '未選擇';
+
+    const html = `
+      <h2 style="text-align:center; color:#1e3a8a; margin-bottom:15px; font-size:1.3rem;">費曼學習法 × 自主學習週循環操作單</h2>
+      <div class="preview-item"><strong>📋 基本資料：</strong>${getValue('studentName')} | ${getValue('studentClass')} | ${getValue('topic')} (第 ${getValue('weekNum')} 週 / ${getValue('learnDate')})</div>
+      <hr style="margin: 10px 0; border:0; border-top: 1px solid #e2e8f0;">
+      <div class="preview-item"><strong>1. 本週選定概念：</strong><br>${getValue('concept')}</div>
+      <div class="preview-item"><strong>2. 我的白話講解：</strong><br>${getValue('explanation')}</div>
+      <div class="preview-item"><strong>3. 卡住或含糊的地方：</strong><br>${getValue('stuckPoint')}</div>
+      <div class="preview-item"><strong>  需要重新弄懂的是：</strong><br>${getValue('needToLearn')}</div>
+      <div class="preview-item"><strong>4. 我的比喻 / 生活例子：</strong><br>${getValue('analogy')}</div>
+      <div class="preview-item"><strong>  一句話總結：</strong><br>${getValue('summarySentence')}</div>
+      <div class="preview-item"><strong>5. 自我檢核答案：</strong></div>
+      <div class="preview-item"><strong>  ① 為什麼會這樣？</strong><br>${getValue('checkQ1')}</div>
+      <div class="preview-item"><strong>  ② 如果條件改變，結果會怎樣？</strong><br>${getValue('checkQ2')}</div>
+      <div class="preview-item"><strong>  檢核狀態：</strong>${checkStatus}</div>
+      <div class="preview-item"><strong>  完成輸出形式：</strong>${outputs}</div>
+      <div class="preview-item"><strong>6. 下週學習目標：</strong><br>${getValue('nextGoal')}</div>
+      <div class="preview-item"><strong>  本週反思：</strong><br>${getValue('reflection')}</div>
+    `;
+
+    document.getElementById('previewContainer').innerHTML = html;
+  }
+
+  // 🚀 PDF 產生邏輯
+  function generatePDF() {
+    const sName = document.getElementById('studentName')?.value || '學生';
+    const week = document.getElementById('weekNum')?.value || '1';
+    const element = document.getElementById('previewCardTarget');
+    const btn = document.getElementById('printBtn');
+
+    btn.innerText = "⌛ 正在生成 PDF 中...";
+    btn.disabled = true;
+
+    const opt = {
+      margin:       [10, 10, 10, 10],
+      filename:     `自主學習週循環單_第${week}週_${sName}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      btn.innerText = "📄 產生 / 匯出 PDF 檔";
+      btn.disabled = false;
+    }).catch(err => {
+      alert("PDF 下載失敗，請確認是否已透過 Safari / Chrome 瀏覽器開啟網頁。");
+      btn.innerText = "📄 產生 / 匯出 PDF 檔";
+      btn.disabled = false;
+    });
+  }
+
+  // 3 分鐘計時器功能
+  let timerInterval;
+  let timeLeft = 180;
+  let isTimerRunning = false;
+
+  function toggleTimer() {
+    if (isTimerRunning) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+    } else {
+      isTimerRunning = true;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          alert('3 分鐘時間到！試著歸納剛剛講得順暢與卡住的地方吧。');
+          isTimerRunning = false;
+        }
+      }, 1000);
+    }
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    isTimerRunning = false;
+    timeLeft = 180;
+    updateTimerDisplay();
+  }
+
+  function updateTimerDisplay() {
+    const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+    const secs = (timeLeft % 60).toString().padStart(2, '0');
+    document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+  }
+</script>
+
+</body>
+</html>
